@@ -7,5 +7,5 @@ import br.com.projetos.apiplanetas.model.Planet;
 
 @Repository
 public interface PlanetRepository extends JpaRepository<Planet, Long>{
-	
+	public Planet findByName(String name);
 }
