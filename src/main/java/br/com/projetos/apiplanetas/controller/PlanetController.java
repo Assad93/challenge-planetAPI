@@ -6,6 +6,7 @@ import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -72,6 +73,13 @@ public class PlanetController {
 		URI uri = uriBuilder.path("/planets/search/{id}").buildAndExpand(planetCreated.getId()).toUri();
 		
 		return ResponseEntity.created(uri).body(planetDto);
+	}
+	
+	@DeleteMapping("/{id}")
+	public ResponseEntity<?> delete(@PathVariable Long id) {
+		planetRepository.deleteById(id);
+		
+		return ResponseEntity.ok().build();
 	}
 	
 }
