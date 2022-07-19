@@ -2,7 +2,6 @@ package br.com.projetos.apiplanetas.controller;
 
 import java.net.URI;
 import java.util.List;
-import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -12,7 +11,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -21,15 +19,11 @@ import com.mashape.unirest.http.exceptions.UnirestException;
 import br.com.projetos.apiplanetas.controller.dto.PlanetDto;
 import br.com.projetos.apiplanetas.controller.form.PlanetForm;
 import br.com.projetos.apiplanetas.model.Planet;
-import br.com.projetos.apiplanetas.repository.PlanetRepository;
 import br.com.projetos.apiplanetas.service.PlanetService;
 
 @RestController
 @RequestMapping("/planets")
 public class PlanetController {
-	
-	@Autowired
-	PlanetRepository planetRepository;
 	
 	@Autowired
 	PlanetService planetService;
@@ -38,31 +32,31 @@ public class PlanetController {
 	@GetMapping
 	public ResponseEntity<List<PlanetDto>> findAll() {
 		
-		List<Planet> planets = planetRepository.findAll();
+		List<Planet> planets = planetService.findAll();
 		
 		List<PlanetDto> planetsDto = PlanetDto.convertList(planets);
 		
 		return ResponseEntity.ok(planetsDto);
 	}
 	
-	@GetMapping("/search")
-	public ResponseEntity<PlanetDto> findByName(@RequestParam("name") String name) {
-		Planet planet = planetRepository.findByName(name);
+	@GetMapping("/name/{name}")
+	public ResponseEntity<PlanetDto> findByName(@PathVariable String name) {
+		Planet planet = planetService.findByName(name);
 		
 		PlanetDto planetDto = new PlanetDto(planet);
 		
 		return ResponseEntity.ok(planetDto);
 	}
 	
-	@GetMapping("/search/{id}")
+	@GetMapping("/id/{id}")
 	public ResponseEntity<PlanetDto> findById(@PathVariable Long id) {
-		Optional<Planet> planet = planetRepository.findById(id);
+		Planet planet = planetService.findById(id);
 		
-		if(!planet.isPresent()) {
+		if(planet == null) {
 			return ResponseEntity.notFound().build();
 		}
 		
-		PlanetDto planetDto = new PlanetDto(planet.get());
+		PlanetDto planetDto = new PlanetDto(planet);
 		
 		return ResponseEntity.ok(planetDto);
 	}
@@ -83,8 +77,8 @@ public class PlanetController {
 	}
 	
 	@DeleteMapping("/{id}")
-	public ResponseEntity<?> delete(@PathVariable Long id) {
-		planetRepository.deleteById(id);
+	public ResponseEntity<?> deleteById(@PathVariable Long id) {
+		planetService.deleteById(id);
 		
 		return ResponseEntity.ok().build();
 	}

@@ -1,5 +1,8 @@
 package br.com.projetos.apiplanetas.service;
 
+import java.util.List;
+import java.util.Optional;
+
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,27 +20,47 @@ public class PlanetService {
 	@Autowired
 	PlanetRepository planetRepository;
 	
-	public Planet save(Planet planet) throws UnirestException {
-			Planet planetWithFilms = setCountFilms(planet);
-			
-			return planetRepository.save(planetWithFilms);
+	public List<Planet> findAll() {
+		return planetRepository.findAll();
 	}
 	
-	private JSONArray fetchAllPlanets() throws UnirestException {
-		String url = "https://swapi.dev/api/planets";
+	public Planet findByName(String name) {
+		return planetRepository.findByName(name);
+	}
+	
+	public Planet findById(Long id) {
+		Optional<Planet> planet = planetRepository.findById(id);
 		
-		return Unirest.get(url).asJson().getBody().getObject().getJSONArray("results");
+		if(!planet.isPresent()) {
+			return null;
+		}
+		
+		return planet.get();
+	}
+	
+	public Planet save(Planet planet) throws UnirestException {
+		Planet planetWithFilms = setCountFilms(planet);
+			
+		return planetRepository.save(planetWithFilms);
+	}
+	
+	public void deleteById(Long id) {
+		planetRepository.deleteById(id);
+	}
+	
+	private JSONObject fetchPlanet(String name) throws UnirestException {
+		String url = "https://swapi.dev/api/planets?search=" + name;
+		
+		JSONArray arrPlanets = Unirest.get(url).asJson().getBody().getObject().getJSONArray("results");
+		
+		return arrPlanets.getJSONObject(0);
 	}
 	
 	private Planet setCountFilms(Planet planet) throws UnirestException {
-		JSONArray planetsInJSON = fetchAllPlanets();
-		
-		for(int i = 0; i < planetsInJSON.length(); i++) {
-			JSONObject planetInJSON = planetsInJSON.getJSONObject(i);
+		JSONObject planetInJSON = fetchPlanet(planet.getName());
 			
-			if(planet.getName().equals(planetInJSON.getString("name"))) {
-				planet.setCountFilms(planetInJSON.getJSONArray("films").length());
-			}
+		if(planet.getName().equals(planetInJSON.getString("name"))) {
+			planet.setCountFilms(planetInJSON.getJSONArray("films").length());
 		}
 		
 		return planet;
