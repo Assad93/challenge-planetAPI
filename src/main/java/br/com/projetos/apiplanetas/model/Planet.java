@@ -13,7 +13,8 @@ public class Planet {
 	private String name;
 	private String climate;
 	private String terrain;
-	
+    private Integer countFilms;
+
 	public Planet() {
 		
 	}
@@ -23,6 +24,14 @@ public class Planet {
 		this.name = name;
 		this.climate = climate;
 		this.terrain = terrain;
+	}
+
+	public Planet(String name, String climate, String terrain, Integer countFilms) {
+		super();
+		this.name = name;
+		this.climate = climate;
+		this.terrain = terrain;
+		this.countFilms = countFilms;
 	}
 
 	public Long getId() {
@@ -36,7 +45,7 @@ public class Planet {
 	public void setName(String name) {
 		this.name = name;
 	}
-
+	
 	public String getClimate() {
 		return climate;
 	}
@@ -51,6 +60,14 @@ public class Planet {
 
 	public void setTerrain(String terrain) {
 		this.terrain = terrain;
+	}
+
+	public Integer getCountFilms() {
+		return countFilms;
+	}
+
+	public void setCountFilms(Integer countFilms) {
+		this.countFilms = countFilms;
 	}
 	
 }

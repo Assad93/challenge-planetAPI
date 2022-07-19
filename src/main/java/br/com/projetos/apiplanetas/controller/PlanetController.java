@@ -16,10 +16,13 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import com.mashape.unirest.http.exceptions.UnirestException;
+
 import br.com.projetos.apiplanetas.controller.dto.PlanetDto;
 import br.com.projetos.apiplanetas.controller.form.PlanetForm;
 import br.com.projetos.apiplanetas.model.Planet;
 import br.com.projetos.apiplanetas.repository.PlanetRepository;
+import br.com.projetos.apiplanetas.service.PlanetService;
 
 @RestController
 @RequestMapping("/planets")
@@ -27,6 +30,9 @@ public class PlanetController {
 	
 	@Autowired
 	PlanetRepository planetRepository;
+	
+	@Autowired
+	PlanetService planetService;
 	
 	
 	@GetMapping
@@ -61,12 +67,13 @@ public class PlanetController {
 		return ResponseEntity.ok(planetDto);
 	}
 	
+	
 	@PostMapping
-	public ResponseEntity<PlanetDto>save(@RequestBody PlanetForm planetForm,  UriComponentsBuilder uriBuilder) {
+	public ResponseEntity<PlanetDto>save(@RequestBody PlanetForm planetForm,  UriComponentsBuilder uriBuilder) throws UnirestException {
 		
 		Planet planet = PlanetForm.convert(planetForm);
 		
-		Planet planetCreated = planetRepository.save(planet);
+		Planet planetCreated = planetService.save(planet);
 		
 		PlanetDto planetDto = new PlanetDto(planetCreated);
 		
