@@ -3,6 +3,8 @@ package br.com.projetos.apiplanetas.controller;
 import java.net.URI;
 import java.util.List;
 
+import javax.validation.Valid;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -18,6 +20,7 @@ import com.mashape.unirest.http.exceptions.UnirestException;
 
 import br.com.projetos.apiplanetas.controller.dto.PlanetDto;
 import br.com.projetos.apiplanetas.controller.form.PlanetForm;
+import br.com.projetos.apiplanetas.controller.message.Message;
 import br.com.projetos.apiplanetas.model.Planet;
 import br.com.projetos.apiplanetas.service.PlanetService;
 
@@ -52,10 +55,6 @@ public class PlanetController {
 	public ResponseEntity<PlanetDto> findById(@PathVariable Long id) {
 		Planet planet = planetService.findById(id);
 		
-		if(planet == null) {
-			return ResponseEntity.notFound().build();
-		}
-		
 		PlanetDto planetDto = new PlanetDto(planet);
 		
 		return ResponseEntity.ok(planetDto);
@@ -63,7 +62,7 @@ public class PlanetController {
 	
 	
 	@PostMapping
-	public ResponseEntity<PlanetDto>save(@RequestBody PlanetForm planetForm,  UriComponentsBuilder uriBuilder) throws UnirestException {
+	public ResponseEntity<PlanetDto>save(@RequestBody @Valid PlanetForm planetForm,  UriComponentsBuilder uriBuilder) throws UnirestException {
 		
 		Planet planet = PlanetForm.convert(planetForm);
 		
@@ -77,10 +76,12 @@ public class PlanetController {
 	}
 	
 	@DeleteMapping("/{id}")
-	public ResponseEntity<?> deleteById(@PathVariable Long id) {
+	public ResponseEntity<Message> deleteById(@PathVariable Long id) {
 		planetService.deleteById(id);
 		
-		return ResponseEntity.ok().build();
+		Message message = new Message("Produto deletado com sucesso");
+		
+		return ResponseEntity.ok().body(message);
 	}
 	
 }

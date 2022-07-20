@@ -3,14 +3,13 @@ package br.com.projetos.apiplanetas.service;
 import java.util.List;
 import java.util.Optional;
 
-import org.json.JSONArray;
-import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.mashape.unirest.http.Unirest;
 import com.mashape.unirest.http.exceptions.UnirestException;
 
+import br.com.projetos.apiplanetas.exception.PlanetNotFoundException;
 import br.com.projetos.apiplanetas.model.Planet;
 import br.com.projetos.apiplanetas.repository.PlanetRepository;
 
@@ -25,17 +24,15 @@ public class PlanetService {
 	}
 	
 	public Planet findByName(String name) {
-		return planetRepository.findByName(name);
+		Optional<Planet> planet = planetRepository.findByName(name);
+		
+		return planet.orElseThrow(() -> new PlanetNotFoundException());
 	}
 	
 	public Planet findById(Long id) {
 		Optional<Planet> planet = planetRepository.findById(id);
 		
-		if(!planet.isPresent()) {
-			return null;
-		}
-		
-		return planet.get();
+		return planet.orElseThrow(() -> new PlanetNotFoundException());
 	}
 	
 	public Planet save(Planet planet) throws UnirestException {
@@ -45,24 +42,54 @@ public class PlanetService {
 	}
 	
 	public void deleteById(Long id) {
+		findById(id);
 		planetRepository.deleteById(id);
 	}
 	
-	private JSONObject fetchPlanet(String name) throws UnirestException {
+	private Integer fetchNumberFilms(String name) throws UnirestException {
 		String url = "https://swapi.dev/api/planets?search=" + name;
 		
-		JSONArray arrPlanets = Unirest.get(url).asJson().getBody().getObject().getJSONArray("results");
+		Boolean planetsFounded = isFoundOnePlanet(name);
 		
-		return arrPlanets.getJSONObject(0);
+		if(!planetsFounded) {
+			return 0;
+		}
+		
+		Integer countFilms = Unirest
+				.get(url)
+				.asJson()
+				.getBody()
+				.getObject()
+				.getJSONArray("results")
+				.getJSONObject(0)
+				.getJSONArray("films")
+				.length();
+		
+		return countFilms;
 	}
 	
 	private Planet setCountFilms(Planet planet) throws UnirestException {
-		JSONObject planetInJSON = fetchPlanet(planet.getName());
+		Integer countFilms = fetchNumberFilms(planet.getName());
+		
+		planet.setCountFilms(countFilms);
 			
-		if(planet.getName().equals(planetInJSON.getString("name"))) {
-			planet.setCountFilms(planetInJSON.getJSONArray("films").length());
+		return planet;
+	}
+	
+	private Boolean isFoundOnePlanet(String name) throws UnirestException {
+		String url = "https://swapi.dev/api/planets?search=" + name;
+		
+		Integer planetsFounded = Unirest
+						.get(url)
+						.asJson()
+						.getBody()
+						.getObject()
+						.getInt("count");
+		
+		if(planetsFounded != 1) {
+			return false;
 		}
 		
-		return planet;
+		return true;
 	}
 }

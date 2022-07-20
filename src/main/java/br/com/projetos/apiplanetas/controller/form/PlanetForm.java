@@ -1,10 +1,17 @@
 package br.com.projetos.apiplanetas.controller.form;
 
+import javax.validation.constraints.NotBlank;
+
 import br.com.projetos.apiplanetas.model.Planet;
 
 public class PlanetForm {
+	@NotBlank
 	private String name;
+	
+	@NotBlank
 	private String climate;
+	
+	@NotBlank
 	private String terrain;
 	
 	public String getName() {
